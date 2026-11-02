@@ -228,6 +228,11 @@ table.ref{border-collapse:collapse;font:500 12.5px/1.3 var(--num);width:100%;min
 .log span:first-child{color:var(--ink)}
 .tile.duel{grid-column:1/-1;flex-direction:row;align-items:center;min-height:auto;background:radial-gradient(120% 140% at 0% 0%,#5a1f2a,var(--bg2) 60%);border-color:#5a2a35}
 .tile.duel>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+/* practice mini feedback */
+.mini2{display:flex;flex-direction:column;gap:4px;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5}
+.mini2 b{font-size:14px}
+.mini2.ok{background:rgba(47,208,143,.1);border:1px solid rgba(47,208,143,.35)}.mini2.ok b{color:var(--green)}
+.mini2.no{background:rgba(255,93,98,.1);border:1px solid rgba(255,93,98,.35)}.mini2.no b{color:var(--red)}
 /* question nav */
 .qnav{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin-inline:-2px}
 .qnav::-webkit-scrollbar{display:none}
@@ -701,6 +706,20 @@ function explain2(t){const pz=t.pz,k=pz.kind;
    ['半池 50',`${pz.f}% × ${pz.pot} − ${100-pz.f}% × ${pz.pot/2} = <em>${num(t.ev[0])}</em>`,`他弃 ${pz.f}% → 赢 ${pz.pot};他跟 ${100-pz.f}% → 输 50。`],
    ['满池 100',`${pz.f}% × ${pz.pot} − ${100-pz.f}% × ${pz.pot} = <em>${num(t.ev[1])}</em>`,`被跟时输 100。`]])+say('弃牌率一样时,诈唬下得小更省钱。实际中下得大他会弃得多,两样要一起想。');
  return null}
+function gameExplain(G){const P=G.pot,B=G.bet,Rz=G.raise,e=G.eq/100,f=G.f,m=G.B.length===3?4:2,st=G.B.length===3?'翻牌':'转牌',left=G.B.length===3?'转牌和河牌两张':'河牌一张';
+ const hc=CAT[catOf(evalH([...G.H,...G.B]))],vc=CAT[catOf(evalH([...G.V,...G.B]))];
+ const lead=evalH([...G.H,...G.B])>evalH([...G.V,...G.B]);const vo=lead?outs(G.V,G.H,G.B):null;
+ const eqTxt=lead?`你现在是${hc},对手是${vc},<b>你领先</b>。对手还能靠${left}追上:他有 ${vo.length} 张 outs,速算 ${vo.length} × ${m} ≈ ${vo.length*m}%,所以你大约 ${100-vo.length*m}%。`
+   :`你现在是${hc},对手是${vc},<b>你落后</b>。你要靠${left}追:你有 ${G.outs.length} 张 outs,速算 ${G.outs.length} × ${m} ≈ ${G.outs.length*m}%。`;
+ const cb=e*(P+2*B),rb=e*(P+2*Rz),best=['弃牌','跟注','全下'][G.ans];
+ return stp([
+  ['需要胜率(只看钱)',`${B} ÷ (${P} + ${B} + ${B}) = <em>${pct(G.need)}</em>`,`跟注付 ${B},跟完底池一共 ${P+2*B}。`],
+  ['你的胜率(看两边的牌)',`<em>${pct(G.eq)}</em>`,eqTxt+` 程序把剩下的牌全发一遍,精确是 ${pct(G.eq)}。`],
+  [lead||vo?'':'',lead?cds(vo,'sm'):G.outs&&G.outs.length?cds(G.outs,'sm'):'',lead?'↑ 对手追上你的牌':'↑ 让你反超的牌'],
+  ['弃牌','<em>0</em>','不再花钱,也不赢。'],
+  ['跟注',`赢 ${pct(G.eq)} × 底池 ${P+2*B} = 平均拿回 ${num(cb)}<br>${num(cb)} − ${B} = <em>${num(G.ev[1])}</em>`,G.eq>G.need?'你的胜率高过需要的,跟注本身就赚。':'你的胜率不够,跟注长期亏。'],
+  ['全下',`他弃 ${Math.round(f*100)}% → 拿走 ${P}+${B} = ${P+B}<br>他跟 ${Math.round((1-f)*100)}% → 底池 ${P+2*Rz},你赢 ${pct(G.eq)} 拿回 ${num(rb)},减去投入 ${Rz} = ${num(rb-Rz)}<br>合计 ${Math.round(f*100)}% × ${P+B} + ${Math.round((1-f)*100)}% × ${num(rb-Rz)} = <em>${num(G.ev[2])}</em>`,'他会弃多少是题目给的假设。'],
+ ].map(s=>s[0]===''&&!s[1]?null:s).map(s=>s&&s[0]===''?['看看是哪几张',s[1],s[2]]:s))+say(G.ans===0?`你的胜率不够,对手又不太弃牌,继续只会亏,${best}最好。`:G.ans===1?`你的胜率够跟,但全下时对手弃牌太少、被跟又不占优,不如只跟注。`:lead?`你领先,把更多钱放进去,被跟时也是你赢面大;他弃了也直接赢,所以全下最好。`:`你虽然落后,但对手 ${Math.round(f*100)}% 会弃,加上被跟还有 ${pct(G.eq)} 的机会,全下平均赚得最多。`)}
 const HB_MAP={rules:1,hands:3,pre:8,outs:10,r24:10,odds:11,bet:12,range:14,raise:13,tbet:16,cbet:17,size:18,exam:19,duel:19,game:19};const HB_N=21;
 function hbGrid(cell){const R='AKQJT98765432';let g='';for(let i=0;i<13;i++)for(let j=0;j<13;j++){const code=i===j?R[i]+R[j]:i<j?R[i]+R[j]+'s':R[j]+R[i]+'o';g+=cell(code,i,j)}return `<div class="hgrid">${g}</div>`}
 function heat(v){const t=Math.max(0,Math.min(1,(v-30)/55));const a=[58,48,30],b=[245,206,110];return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`}
@@ -882,10 +901,9 @@ function renderGame(){$('#ttl').textContent='实战';
     `<p class="note">${G.B.length===3?'翻牌':'转牌'}。假设跟注后不再下注直接发完;你全下时对手 ${Math.round(G.f*100)}% 会弃牌,否则跟注。</p>`;
   Q.forEach((q,i)=>{if(i>G.stage)return;const p=G.p[i];
     h+=`<div class="ask"><span class="av">荷</span><p>${q.q}</p></div>`+optsHTML(q.o,p!=null&&p!==q.a?[p]:[],q.a,p!=null,`data-q="${i}"`);
-    if(p!=null&&i<2)h+=`<p class="note" style="color:${p===q.a?'var(--green)':'var(--red)'}">${p===q.a?'✓ 对':'✗ 答案 '+q.o[q.a]}。${i===0?`${G.bet} ÷ (${G.pot} + ${G.bet} × 2) = ${pct(G.need)}`:`精确胜率 ${pct(G.eq)}`}</p>`});
+    if(p!=null&&i<2)h+=`<div class="mini2 ${p===q.a?'ok':'no'}"><b>${p===q.a?'✓ 对了':'✗ 答案是 '+q.o[q.a]}</b><span>${i===0?`跟注付 ${G.bet},跟完底池 ${G.pot} + ${G.bet} + ${G.bet} = ${G.pot+2*G.bet}。${G.bet} ÷ ${G.pot+2*G.bet} = ${pct(G.need)}。`:(()=>{const m=G.B.length===3?4:2;const lead=!G.outs;const vo=lead?outs(G.V,G.H,G.B).length:0;return lead?`你领先,对手有 ${vo} 张牌能追上,约 ${vo*m}%,所以你大约 ${100-vo*m}%。精确 ${pct(G.eq)}。`:`你落后,有 ${G.outs.length} 张 outs,× ${m} ≈ ${G.outs.length*m}%。精确 ${pct(G.eq)}。`})()}</span></div>`});
   if(G.p[2]!=null){const right=G.p[2]===G.ans,m=G.B.length===3?4:2;
-    h+=fbHTML(right,right?'正确':'应该'+Q[2].o[G.ans],evMeter(G.ev,['弃牌','跟注','全下'])+eqMeter(G.eq,G.need)+
-    (G.outs?`<p class="tx">你落后,有 ${G.outs.length} 张 outs,速算 ≈ ${G.outs.length*m}%。</p>${G.outs.length?cds(G.outs,'sm'):''}`:'<p class="tx">你现在领先。</p>'),`<div class="acts"><button class="btn pri" id="nx">下一手 ›</button></div>`)}
+    h+=fbHTML(right,right?'正确':'应该'+Q[2].o[G.ans],evMeter(G.ev,['弃牌','跟注','全下'])+eqMeter(G.eq,G.need)+gameExplain(G),`<div class="acts"><button class="btn pri" id="nx">下一手 ›</button></div>`)}
   app.innerHTML=h;
   app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const i=+b.dataset.q,j=+b.dataset.i;if(G.p[i]!=null)return;G.p[i]=j;
     if(i===2){stat.n++;if(j===G.ans){stat.ok++;stat.streak++;stat.best=Math.max(stat.best,stat.streak)}else stat.streak=0;save()}else G.stage=i+1;renderGame();const f=$('#fb');if(f)f.scrollIntoView({block:'nearest',behavior:'smooth'})});
