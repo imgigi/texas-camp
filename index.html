@@ -228,6 +228,49 @@ table.ref{border-collapse:collapse;font:500 12.5px/1.3 var(--num);width:100%;min
 .log span:first-child{color:var(--ink)}
 .tile.duel{grid-column:1/-1;flex-direction:row;align-items:center;min-height:auto;background:radial-gradient(120% 140% at 0% 0%,#5a1f2a,var(--bg2) 60%);border-color:#5a2a35}
 .tile.duel>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+/* question nav */
+.qnav{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin-inline:-2px}
+.qnav::-webkit-scrollbar{display:none}
+.qp{flex:none;min-width:36px;height:36px;border-radius:10px;background:var(--bg2);border:1.5px solid var(--line);font:700 14px/1 var(--num);color:var(--mute);padding:0 8px}
+.qp.on{background:rgba(245,196,81,.16);border-color:rgba(245,196,81,.5);color:var(--gold)}
+.qp.cur{background:var(--green);border-color:var(--green);color:#03281a}
+.qp.lsn{font-family:var(--body)}
+.qn{flex:none;margin-left:auto;padding-left:8px;font-size:12px;color:var(--mute);white-space:nowrap}
+.fb.rv{animation:none}
+.acts .btn:not(.pri){flex:none}
+/* plain-language help */
+.term{font:inherit;color:inherit;background:none;border:0;padding:0;border-bottom:1.5px dashed var(--gold);cursor:pointer;line-height:inherit}
+.tsheet{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.tsheet[hidden]{display:none}
+.tsi{width:100%;max-width:480px;background:var(--bg2);border-top:2px solid var(--gold);border-radius:18px 18px 0 0;padding:18px max(18px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.tsi b{font:400 24px/1.2 var(--display);color:var(--gold)}
+.tsi p{margin:0;font-size:16px;line-height:1.6}
+.tsi small{color:var(--mute);font-size:14px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.steps2{display:flex;flex-direction:column;gap:10px}
+.st2{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.st2>i{width:26px;height:26px;border-radius:50%;background:var(--gold);color:#3a2700;font:700 13px/26px var(--num);text-align:center;font-style:normal}
+.st2>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.st2 b{font-size:14.5px}
+.st2 p{margin:0;font-size:13.5px;color:#c9d2e6}
+.st2 .fx{font-size:14px}
+.say2{background:rgba(47,208,143,.1);border:1px solid rgba(47,208,143,.35);border-radius:12px;padding:10px 12px;font-size:14.5px;line-height:1.55}
+.say2 span{display:inline-block;font:700 11px/1 var(--body);background:var(--green);color:#03281a;border-radius:99px;padding:4px 8px;margin-right:8px;vertical-align:1px}
+.words{display:flex;flex-direction:column;gap:8px}
+.words>div{display:flex;flex-direction:column;gap:3px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.words>div:last-child{border:0;padding:0}
+.words b{font:400 18px/1.2 var(--display);color:var(--gold)}
+.words span{font-size:14px}
+.words small{color:var(--mute);font-size:12.5px}
+.bk{display:flex;flex-direction:column;font-size:13px;background:var(--bg2);border-radius:10px;padding:6px 10px}
+.bk>div{display:grid;grid-template-columns:62px 72px 1fr;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)}
+.bk>div:last-child{border:0}
+.bk .bkh{color:var(--mute);font-size:11.5px}
+.bk small{color:var(--mute);font-size:11px}
+.bk .bar{position:relative;height:16px;background:var(--bg3);border-radius:8px;overflow:hidden}
+.bk .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px}
+.bk .bar b{position:absolute;right:6px;top:0;font:700 11px/16px var(--num)}
+.bk .bkt{font-weight:700}
+.cmb{display:flex;flex-wrap:wrap;gap:8px}
 /* handbook */
 .hbtn{background:linear-gradient(160deg,var(--gold),var(--gold-lo));color:#3a2700;border:0;font:400 16px/1 var(--display)}
 .hbk[hidden]{display:none}
@@ -297,6 +340,7 @@ table.ref{border-collapse:collapse;font:500 12.5px/1.3 var(--num);width:100%;min
   <main id="app"></main>
 </div>
 <div class="hbk" id="hbk" hidden></div>
+<div class="tsheet" id="tsheet" hidden></div>
 <script>
 const RK='23456789TJQKA',SU='shdc';
 const card=s=>RK.indexOf(s[0])*4+SU.indexOf(s[1]);
@@ -389,41 +433,41 @@ const CH=[
  {kind:'call',hero:'6h 5h',vill:'Kd Qs',board:'Kh 9h 2c 3s',pot:150,bet:50,allin:1,ask:'转牌,对手全下 50,底池已有 150。跟还是弃?',note:'转牌胜率掉到了 27%,但下注小、底池大,只需要 20%,照样跟。'}]},
 {id:'bet',t:'下注',d:'诈唬要多少弃牌率,防守要多宽',h:'从下注方看这笔账',body:`<ul><li><b>诈唬</b>:下注 B 到底池 P,对手弃牌率超过 <span class="k">B ÷ (P + B)</span> 就赚钱。</li><li>半池诈唬只要 33% 弃牌,满池要 50%。</li><li><b>最低防守频率</b>:面对下注,至少要用 <span class="k">P ÷ (P + B)</span> 的手牌继续,否则对手随便诈唬都赚。</li><li><b>价值下注</b>:下注是为了让更差的牌跟注。对手只会用更好的牌跟,就别下注。</li><li><b>河牌诈唬比例</b>:河牌下注 B 到底池 P,下注的牌里诈唬占 <span class="k">B ÷ (P + 2B)</span> 最平衡,对手怎么选都占不到便宜。半池是 1 个诈唬配 3 个价值,满池是 1 配 2。</li><li><b>位置</b>:后说话的人能看到对方的动作再决定,同样的牌在有利位置更赚。</li></ul><p class="key">下注前想清楚:我希望对手弃牌,还是跟注?</p>`,
  pz:[
- {kind:'bluff',pot:100,bet:50,ask:'底池 100,你诈唬下注 50。对手至少要弃多少,你才不亏?'},
- {kind:'bluff',pot:100,bet:100,ask:'底池 100,你诈唬下注满池 100。需要多少弃牌率?'},
- {kind:'mdf',pot:100,bet:100,ask:'底池 100,对手下注 100。你至少要用多少比例的手牌继续?'},
- {kind:'rbluff',pot:100,bet:50,ask:'河牌你下注半池(底池 100,下注 50)。下注的牌里诈唬最多占多少才平衡?'}]},
+ {kind:'bluff',pot:100,bet:50,ask:'你手里没好牌,但想下注 50 把对手吓跑,抢走底池 100(这叫诈唬)。对手至少要有多大比例弃牌,你才不亏?'},
+ {kind:'bluff',pot:100,bet:100,ask:'同样诈唬,这次下注 100 抢底池 100。对手要多大比例弃牌,你才不亏?'},
+ {kind:'mdf',pot:100,bet:100,ask:'底池 100,对手下注 100。假设你这时可能拿着 100 种不同的牌,至少要拿其中多少比例继续(跟或加),对手才不能随便诈唬就赚钱?'},
+ {kind:'rbluff',pot:100,bet:50,ask:'最后一张牌(河牌)发完,你下注 50 到底池 100。你下注的这些牌里,有好牌也有诈唬。诈唬最多占几成,对手才没法针对你?'}]},
 {id:'range',t:'范围',d:'对手不是一手牌,是一组牌',h:'用范围思考',body:`<ul><li>实战中看不到对手的牌,只能根据他的动作推测他<b>可能拿的一组牌</b>,叫范围。</li><li>用组合数算比例:每种对子 6 种组合,同花 4 种,不同花 12 种。桌上和你手里的牌会减少对手的组合。</li><li><b>阻挡</b>:你手里或桌上有某张牌,对手拿到含这张牌的组合就变少。AK 本来 16 种,桌上和你手里各有一张 K 时只剩 8 种。</li><li>对手范围里全是比你大的牌时,顶对也要弃;范围里有很多听牌和诈唬时,中等牌也能跟。</li><li>前几关能看到对手的牌,是为了练算数。实战里把同样的算数套在范围上。</li></ul><p class="key">问自己:他这样下注,会是哪些牌?</p>`,
  pz:[
- {kind:'combo',code:'AK',hero:'Kh Jc',board:'Ks 9h 4c 2d',ask:'桌上有 K♠,你手里有 K♥。对手拿 AK 还有几种组合?'},
- {kind:'call',hero:'Kh Jc',range:'AK, KQ, 99, 44, 22',board:'Ks 9h 4c 2d',pot:100,bet:100,allin:1,ask:'转牌你是顶对 J 踢脚。一个很紧的对手全下满池,他的范围如下。跟还是弃?'},
- {kind:'call',hero:'Kh Jc',range:'AK, KQ, QJs, QTs, JTs, T8s, 87s, A5s, 99',board:'Ks 9h 4c 2d',pot:100,bet:100,allin:1,ask:'同样的牌面,换一个爱诈唬的对手,范围里有很多没中的牌。跟还是弃?'}]},
+ {kind:'combo',code:'AK',hero:'Kh Jc',board:'Ks 9h 4c 2d',ask:'桌上有 K♠,你手里有 K♥。对手如果拿的是 A 和 K,有几种不同的花色搭配(组合)?'},
+ {kind:'call',hero:'Kh Jc',range:'AK, KQ, 99, 44, 22',board:'Ks 9h 4c 2d',pot:100,bet:100,allin:1,ask:'你有一对 K。一个很少诈唬的对手全下 100,根据他的打法,他可能拿着上面这几种牌(范围)。跟还是弃?'},
+ {kind:'call',hero:'Kh Jc',range:'AK, KQ, QJs, QTs, JTs, T8s, 87s, A5s, 99',board:'Ks 9h 4c 2d',pot:100,bet:100,allin:1,ask:'同样的牌,换一个爱诈唬的对手。他可能拿的牌里多了很多什么都没中的牌。跟还是弃?'}]},
 {id:'raise',t:'加注',d:'弃、跟、加,比较期望收益',h:'三个选项怎么选',body:`<ul><li>三个选项比的是<b>期望收益(EV)</b>,不是胜率。你的胜率不会因为你加注而改变。</li><li>弃牌:收益记为 <span class="k">0</span>(已经放进去的钱不算)。</li><li>跟注:<span class="k">EV = 胜率 × 跟注后底池 − 跟注额</span>。</li><li>加注:多了一种结果,对手弃牌,你直接拿走底池。<br><span class="k">EV = 弃牌率 × 现有底池 + 跟注率 × (对跟注范围的胜率 × 新底池 − 你投入的钱)</span>。</li><li>对手被加注后,弃掉的是弱牌,跟的是强牌。所以要分开算对“跟注范围”的胜率。</li><li>为了能算清楚,这一关假设:跟注后双方不再下注直接发完;加注就是全下。</li></ul><p class="key">加注的价值 = 对手弃牌的钱 + 被跟时的胜率。两样都没有,就别加。</p>`,
  pz:[
- {kind:'ev',hero:'Ad Kd',board:'Qd 8d 2s',fold:'JTs, T9s, 76s, A5s, 99, 66',call:'AQ, KQ, QJs, 88, 22',pot:100,bet:60,raise:250,ask:'同花听牌加两张高张,对手下注 60。他被全下时会弃掉上面一行的牌,跟下面一行的牌。'},
- {kind:'ev',hero:'Kh Jc',board:'Ks 9h 4c 2d 7s',fold:'QJs, QTs, JTs, T8s, 86s, A5s, 65s',call:'AK, KQ, 99, 44',pot:100,bet:75,raise:300,ask:'河牌你是顶对,对手下注 75,他的范围一半是没中的听牌。'},
- {kind:'ev',hero:'Jd Tc',board:'Qs 8h 2d 3c',fold:'A5s',call:'AQ, KQ, QJ, 88, 22, Q8s',pot:100,bet:100,raise:300,ask:'转牌卡顺听牌,对手满池下注,他几乎全是成牌。'}]},
+ {kind:'ev',hero:'Ad Kd',board:'Qd 8d 2s',fold:'JTs, T9s, 76s, A5s, 99, 66',call:'AQ, KQ, QJs, 88, 22',pot:100,bet:60,raise:250,ask:'你差一张就成同花,还有 A、K 两张大牌。对手下注 60。如果你全下,他拿“会弃”那行的牌就弃,拿“会跟”那行的就跟。弃、跟、全下,哪个平均赚得最多?'},
+ {kind:'ev',hero:'Kh Jc',board:'Ks 9h 4c 2d 7s',fold:'QJs, QTs, JTs, T8s, 86s, A5s, 65s',call:'AK, KQ, 99, 44',pot:100,bet:75,raise:300,ask:'河牌你有一对 K,对手下注 75。他的牌一半是没中的听牌(在诈唬),一半比你大。弃、跟、全下,哪个平均赚得最多?'},
+ {kind:'ev',hero:'Jd Tc',board:'Qs 8h 2d 3c',fold:'A5s',call:'AQ, KQ, QJ, 88, 22, Q8s',pot:100,bet:100,raise:300,ask:'你只差中间一张成顺子,对手满池下注 100,他几乎都是已经成了的牌。弃、跟、全下,哪个平均赚得最多?'}]},
 
 {id:'tbet',t:'面对加注',d:'3-bet 什么时候打、打多大,被 3-bet 怎么算',h:'',body:'',
  pz:[
  {kind:'mc',opts:['跟注','3-bet','4-bet','全下'],ans:1,ask:'前面有人开池加注,你再加注一次,这叫什么?',why:'大盲算第一次下注,开池加注是第二次(2-bet),再加就是 3-bet,再往上是 4-bet。'},
- {kind:'v3b',hero:'Qs Qd',eq:69.1,ask:'对手开池,他面对 3-bet 时会继续的牌是右边这 15%。你拿 QQ,值得打价值 3-bet 吗?'},
- {kind:'v3b',hero:'Ah Jd',eq:51.5,ask:'同一个对手,你拿 AJo。值得打价值 3-bet 吗?'},
- {kind:'v3b',hero:'Ac Kd',eq:62.5,ask:'你拿 AKo 呢?'},
+ {kind:'v3b',hero:'Qs Qd',eq:69.1,ask:'对手先加注。如果你再加注一次(3-bet),他只会拿桌上列出的这些牌继续玩,其他都弃。你拿 QQ,该不该为了赚钱再加注?'},
+ {kind:'v3b',hero:'Ah Jd',eq:51.5,ask:'同一个对手,你拿 A J 不同花。该不该再加注?'},
+ {kind:'v3b',hero:'Ac Kd',eq:62.5,ask:'你拿 A K 不同花呢?'},
  {kind:'mc',opts:['6 BB','9 BB','15 BB','25 BB'],ans:1,ask:'庄位开池到 2.5 BB,你在大盲(翻牌后没位置)。3-bet 到多少合适?',why:'没位置时 3-bet 打开池的 3.5 到 4 倍:2.5 × 3.5 ≈ 8.8,2.5 × 4 = 10。9 BB 在这个区间里。'},
  {kind:'mc',opts:['5 BB','7.5 BB','12 BB','20 BB'],ans:1,ask:'关煞位开池到 2.5 BB,你在庄位(有位置)。3-bet 到多少合适?',why:'有位置时打 2.5 到 3 倍:2.5 × 3 = 7.5 BB。'},
- {kind:'need3',open:2.5,three:10,dead:0.5,ask:'你开池到 2.5 BB,大盲 3-bet 到 10 BB,小盲已弃(留下 0.5)。你跟注需要多少胜率?'}]},
+ {kind:'need3',open:2.5,three:10,dead:0.5,ask:'你先加注到 2.5 BB,大盲再加注到 10 BB,小盲弃牌(他的 0.5 BB 留在底池)。你要再补 7.5 BB 跟注,需要多少胜率?'}]},
 {id:'cbet',t:'持续下注',d:'翻牌后接着下注:看牌面干湿决定下多少',h:'',body:'',
  pz:[
- {kind:'tex',boards:['Kd 7c 2h','9h 8h 7c'],ask:'哪个翻牌面上,对手随机两张牌有听牌(同花听或顺子听)的比例更高?'},
- {kind:'tex',boards:['Qh Jd Tc','Ad 9c 2h'],ask:'再比一组:哪个牌面更湿?'},
+ {kind:'tex',boards:['Kd 7c 2h','9h 8h 7c'],ask:'下面两组翻牌,哪一组更容易让对手“差一张就成牌”(听牌)?'},
+ {kind:'tex',boards:['Qh Jd Tc','Ad 9c 2h'],ask:'再比一组:哪一组听牌更多(更湿)?'},
  {kind:'mc',board:'Kd 7c 2h',opts:['经常下注,小尺寸约 1/3 池','少下注,大尺寸约 2/3 池'],ans:0,ask:'你翻牌前开池,对手跟注。翻牌 K♦ 7♣ 2♥,彩虹干燥面。持续下注怎么打?',why:'干燥面听牌几乎为零,对手大多没中,小注就能拿下底池或拿到价值,所以经常下、下小。'},
  {kind:'mc',board:'9h 8h 7c',opts:['经常下注,小尺寸约 1/3 池','少下注,大尺寸约 2/3 池'],ans:1,ask:'翻牌 9♥ 8♥ 7♣,两张同花、三张相连。持续下注怎么打?',why:'湿润面对手中牌和听牌都多,小注吓不跑人。下注次数减少,下的时候用大一点的尺寸,让听牌付出更高的价格。'}]},
 {id:'size',t:'下注尺度',d:'下多大:给对手什么价格,诈唬花多少',h:'',body:'',
  pz:[
- {kind:'deny',outs:9,left:46,ask:'转牌你领先,对手只有同花听牌(河牌中牌 9/46)。最少下注多大,才能让他单看底池赔率跟注不划算?'},
- {kind:'deny',outs:4,left:46,ask:'换成对手只有卡顺听牌(4 张 outs)。最少下多大?'},
- {kind:'bsz',pot:100,f:40,ask:'河牌诈唬。假设无论下多大,对手都有 40% 弃牌。下半池还是满池收益更高?'},
+ {kind:'deny',outs:9,left:46,ask:'转牌你领先,对手差一张成同花,河牌中的机会是 9/46。你最少下注多大,他跟注就不划算?'},
+ {kind:'deny',outs:4,left:46,ask:'换成对手只差中间一张成顺子(4 张能中)。最少下多大?'},
+ {kind:'bsz',pot:100,f:40,ask:'河牌你诈唬。假设不管下多少,对手都有 40% 会弃。下半池(50)还是满池(100)平均赚得多?'},
  {kind:'mc',opts:['下注拿价值','过牌'],ans:1,ask:'河牌你有中等牌力。你判断对手只会用比你大的牌跟注,比你小的都会弃。',why:'价值下注要让更差的牌跟。只有更好的牌会跟,下注只会在被跟时多输,过牌更好。'}]},
 {id:'exam',t:'考核',d:'综合运用前面所有内容',h:'综合考核',body:`<p>这几题不提示用哪条技巧。</p><ul><li>先认清双方的牌型。</li><li>数 outs,记得高张和不干净的牌。</li><li>算需要的胜率,再和自己的胜率比较。</li></ul><p class="key">全部做对,就可以去实战了。</p>`,
  pz:[
@@ -447,6 +491,41 @@ function donut(parts,center,sub){let a=0;const R=46,C=2*Math.PI*R,tot=parts.redu
   const segs=parts.map(([v,col])=>{const l=v/tot*C,s=`<circle r="${R}" cx="60" cy="60" fill="none" stroke="${col}" stroke-width="16" stroke-dasharray="${l-2} ${C-l+2}" stroke-dashoffset="${-a}" transform="rotate(-90 60 60)"/>`;a+=l;return s}).join('');
   return `<svg viewBox="0 0 120 120" width="120" height="120" style="flex:none">${segs}<text x="60" y="62" text-anchor="middle" style="fill:var(--ink);font:700 22px var(--num)">${center}</text><text x="60" y="80" text-anchor="middle" style="fill:var(--mute);font:500 10px var(--body)">${sub||''}</text></svg>`}
 const legend=items=>`<div style="display:flex;flex-direction:column;gap:6px;font-size:13px">${items.map(([c,t])=>`<span style="display:flex;gap:8px;align-items:center"><i style="width:12px;height:12px;border-radius:3px;background:${c};flex:none"></i>${t}</span>`).join('')}</div>`;
+
+const TERMS={
+ '需要胜率':['只看钱算出来的数:跟注以后,你至少要赢这么多次才不亏。跟对手拿什么牌无关。','底池 100,对手下 50,你跟 50 → 总共 200 里你出了 50 → 需要 25%。'],
+ '你的胜率':['你的牌对上对手可能拿的牌,发完公共牌后你赢的比例。对手的牌不同,这个数就不同。','对手很紧、全是强牌 → 你的胜率低;对手爱诈唬 → 你的胜率高。'],
+ '胜率':['发完所有公共牌后,你赢的比例(平局算一半)。','胜率 40% = 同样的局面打 100 次,大约赢 40 次。'],
+ '范围':['对手可能拿着的一组牌。看不到他的牌,就根据他怎么打来推测。','他突然全下,范围就是“会这样全下的牌”,比如大对子、三条。'],
+ '组合':['同一种起手牌,不同花色的搭配有几种。也叫 combo。','A K 有 4 张 A × 4 张 K = 16 种;对子 A A 有 6 种。'],
+ '阻挡':['你手里或桌上已经有的牌,对手就不可能拿到,他的组合会变少。','你拿着 K♥,对手拿 A K 的组合就少了。'],
+ '期望收益':['同样的情况打很多次,平均每次赚或亏多少。也叫 EV。','+10 = 平均每次赚 10 个筹码;−20 = 平均每次亏 20。'],
+ 'EV':['期望收益:同样的情况打很多次,平均每次赚多少。','EV +62.6 = 这样打平均每次赚 62.6。'],
+ '诈唬':['牌不好也下注,希望对手害怕弃牌,你就赢了。','你什么都没中,下注 50 去抢 100 的底池。'],
+ '价值下注':['牌好的时候下注,希望比你差的牌来跟,多赢一点。','你有三条,下注让一对来跟。'],
+ '弃牌率':['你下注后,对手弃牌的比例。','弃牌率 40% = 100 次里他弃 40 次。'],
+ '最低防守':['对手下注时,你至少要拿多大比例的牌继续,他才不能随便诈唬就赚钱。英文叫 MDF。','满池下注 → 至少继续 50%。'],
+ '平衡':['诈唬和好牌按一定比例混着打,对手怎么应对都占不到便宜。','河牌半池下注:3 次好牌配 1 次诈唬。'],
+ '3-bet':['别人加注后,你再加注一次。','对手加到 2.5,你加到 9,这就是 3-bet。'],
+ '4-bet':['被 3-bet 之后,再加注一次。',''],
+ '开池':['前面的人都弃牌时,你第一个加注。','也叫 open。'],
+ '持续下注':['翻牌前你是加注的人,翻牌出来后你接着下注。英文叫 c-bet。','你翻牌前加注,对手跟,翻牌后你先下注。'],
+ '湿':['公共牌连在一起或同花多,对手很容易有听牌。','9♥ 8♥ 7♣ 很湿。'],
+ '干燥':['公共牌不连、不同花,很难有听牌。','K♦ 7♣ 2♥ 很干。'],
+ '听牌':['差一张就成顺子或同花。','手里 A♦K♦,桌上两张方块 → 同花听牌。'],
+ '有位置':['翻牌后你比对手后说话。能先看他怎么做再决定,更有利。','庄位几乎永远有位置。'],
+ '没位置':['翻牌后你比对手先说话,信息少,更难打。','大盲对庄位,翻牌后你先说话。'],
+ 'BB':['大盲注,用来当筹码单位。','盲注 5/10 时,1 BB = 10,2.5 BB = 25。'],
+ 'outs':['下一张发出来能让你反超的牌。','同花听牌通常有 9 张 outs。'],
+ '底池赔率':['你跟注要付的钱和能赢的钱的比例,换算成你需要的胜率。',''],
+ '全下':['把自己剩下的筹码全部推进去。',''],
+ '顶对':['你的牌和公共牌里最大的那张配成一对。','桌上最大是 K,你有 K → 顶对。'],
+};
+function tip(s){if(!s)return s;const keys=Object.keys(TERMS).sort((a,b)=>b.length-a.length);const used=new Set();
+  return s.split(/(<[^>]+>)/).map(seg=>{if(seg.startsWith('<'))return seg;
+    const re=new RegExp(keys.map(k=>k.replace(/[.*+?^${}()|[\]\\-]/g,'\\$&')).join('|'),'g');
+    return seg.replace(re,m=>{if(used.has(m))return m;used.add(m);return `<button type="button" class="term" data-term="${m}">${m}</button>`})}).join('')}
+function wordsViz(keys){return `<div class="words">${keys.map(k=>`<div><b>${k}</b><span>${TERMS[k][0]}</span>${TERMS[k][1]?`<small>例:${TERMS[k][1]}</small>`:''}</div>`).join('')}</div>`}
 const VIZ={
  streets:()=>[['翻牌前',0],['翻牌',3],['转牌',4],['河牌',5]].map(([n,k],i)=>`<div style="display:grid;grid-template-columns:20px 54px 1fr;gap:8px;align-items:center"><span class="chip ${['k','b','v','g'][i]}" style="--s:20px;font-size:10px">${i+1}</span><b style="font-size:13px">${n}</b><span class="row-c">${cards('Kh 9h 2c 7s As').slice(0,k).map(c=>cd(c,'sm')).join('')}${'<span class="cd sm slot"></span>'.repeat(5-k)}</span></div>`).join('')+`<p class="note">每一轮发完牌,都有一次下注。</p>`,
  seats:()=>{const S=[['UTG',60,28],['HJ',160,14],['CO',260,28],['BTN',292,92],['SB',160,128],['BB',28,92]];
@@ -485,6 +564,17 @@ const VIZ={
  deny:()=>[[.25,'1/4 池'],[1/3,'1/3 池'],[.5,'半池'],[2/3,'2/3 池']].map(([b,n])=>hbar(n,b/(1+2*b)*100,40,b/(1+2*b)>9/46?'var(--green)':'var(--red)')).join('')+`<p class="note">同花听牌在转牌到河牌中牌 9 ÷ 46 = 19.6%。绿色尺寸让他单看底池赔率跟注不划算。</p>`,
  vbet:()=>`<div class="pillrow"><span class="pill g">更差的牌也会跟 → 下大</span><span class="pill y">只有部分会跟 → 下小</span><span class="pill r">只有更好的跟 → 过牌</span></div>`,
  bsz:()=>`<div class="fx">诈唬收益 = <em>弃牌率 × 底池 − 跟注率 × 下注</em></div><p class="note">同样 40% 弃牌:半池 0.4 × 100 − 0.6 × 50 = +10;满池 0.4 × 100 − 0.6 × 100 = −20。</p>`,
+ twoeq:()=>`<div class="big4"><div><small>需要胜率</small><b style="font-size:22px">只看钱</b><small>底池 100 下注 50 → 25%<br>不管对手拿什么,都是这个数</small></div><div><small>你的胜率</small><b style="font-size:22px">看对手牌</b><small>对手全是强牌 → 低<br>对手很多诈唬 → 高</small></div></div><div class="fx">你的胜率 &gt; 需要胜率 → <em>跟</em><br>你的胜率 &lt; 需要胜率 → <em>弃</em></div>`,
+ w_bet:()=>wordsViz(['诈唬','价值下注','弃牌率','最低防守','平衡']),
+ w_range:()=>wordsViz(['范围','组合','阻挡']),
+ w_raise:()=>wordsViz(['期望收益','全下','弃牌率']),
+ w_tbet:()=>wordsViz(['开池','3-bet','4-bet','BB','有位置','没位置']),
+ w_cbet:()=>wordsViz(['持续下注','听牌','干燥','湿']),
+ w_size:()=>wordsViz(['价值下注','诈唬','底池赔率']),
+ bluffcoin:()=>`<div class="tree"><div class="n" style="--c:var(--green)"><b>他弃</b> → 你赢下底池 <b>+100</b></div><div class="n" style="--c:var(--red)"><b>他跟</b> → 你没牌,输掉下注 <b>−50</b></div></div><div class="fx">赢 100 的次数 × 100 = 输的次数 × 50<br>→ 他弃 1 次就够抵他跟 2 次<br>→ 弃牌率 <em>1 ÷ 3 = 33.3%</em></div>`,
+ mdf100:()=>{let g='';for(let i=0;i<100;i++)g+=`<span class="${i<50?'in2':''}"></span>`;return `<div class="mini" style="grid-template-columns:repeat(20,1fr)">${g}</div><div class="pillrow"><span class="pill g">至少 50 种继续</span><span class="pill">最多 50 种弃</span></div><p class="note">对手满池诈唬:冒 100 赢 100,只要你弃牌超过一半,他随便诈唬都赚。</p>`},
+ ratio2:()=>`<div class="pillrow"><span class="chip g">值</span><span class="chip g">值</span><span class="chip g">值</span><span class="chip r">诈</span><span class="pill">4 次下注里 1 次诈唬 = 25%</span></div><div class="fx">对手跟注:付 50,赢 200 → 他需要 <em>25%</em><br>你的诈唬正好 25% → 他跟和弃<em>一样</em>,没法针对你</div><p class="note">这是长期的比例,不是严格轮流打。</p>`,
+ evtree2:()=>`<div class="tree"><div class="n" style="--c:var(--red)"><b>弃牌</b>:不再花钱 → <b>0</b></div><div class="n" style="--c:var(--green)"><b>跟注</b>:付 60,底池变 220<br>赢的时候拿 220 → 平均 = 胜率 × 220 − 60</div><div class="n" style="--c:var(--gold)"><b>全下</b>:两种结果</div><div class="kids"><div class="n" style="--c:var(--gold)">他弃 → 直接拿走 160</div><div class="n" style="--c:var(--gold)">他跟 → 底池变大,看你能不能赢</div></div></div><p class="note">把每种结果的钱 × 发生的比例,加起来,就是这一种打法的平均收益。哪个最大选哪个。</p>`,
  trophy:()=>`<div style="display:flex;justify-content:center;gap:6px;padding:8px 0"><span class="chip" style="--s:64px;font-size:22px">考</span></div><div class="pillrow" style="justify-content:center"><span class="pill">认牌型</span><span class="pill">数 outs</span><span class="pill">算赔率</span><span class="pill">比收益</span></div>`
 };
 function texCount(bstr){const B=cards(bstr);let made=0,draw=0,n=0;for(let a=0;a<52;a++)for(let b=a+1;b<52;b++){if(B.includes(a)||B.includes(b))continue;n++;const v=[a,b];
@@ -500,13 +590,13 @@ const SLIDES={
  pre:[['越靠后,玩得越多','posbars','后说话能先看别人怎么做,所以庄位能玩 43% 的牌,枪口位只玩 14%。'],['开池表','chart','前面没人入池时,表里的牌加注,其余弃牌。不要平跟。']],
  outs:[['什么是 outs','outsdemo','下一张发出来,能让你从落后变领先的牌。'],['常见听牌','drawcounts','记住这四个数,数 outs 就快了。'],['不干净的 outs','dirty','先数听牌,再加高张,最后减掉会帮对手的牌。']],
  r24:[['× 4 和 × 2','rule24','桌上来不及算,用 outs 乘一个数就够。'],['速算 vs 精确','rule24chart','outs 多的时候用修正公式。']],
- odds:[['需要多少胜率','potpie','你的胜率高于这个数就跟,低于就弃。'],['常用的四个数','sizes','对手下注越大,你需要的胜率越高。'],['隐含赔率','implied','对手筹码多、会付钱时才算得上。']],
- bet:[['诈唬要多少弃牌','bluffbar','对手弃牌超过这个比例,诈唬长期就赚。'],['最低防守','mdf','防守低于这个比例,对手拿任何牌诈唬都赚。'],['河牌诈唬占比','ratio','诈唬占这么多时,对手跟或弃都占不到便宜。']],
- raise:[['比收益,不比胜率','evtree','你的胜率不会因为加注而变。加注多了一种赢法:对手弃牌。'],['这一关的假设','assume','加注的价值 = 对手弃牌的钱 + 被跟时的胜率。两样都没有就别加。']],
- range:[['对手是一组牌','rangegrid','看不到对手的牌,就根据他的动作推测他可能有的一组牌。'],['组合数和阻挡','combos','用组合数算范围里每种牌占多少。']],
- tbet:[['开池、3-bet、4-bet','tbflow','每多加注一次,对手剩下的牌就更强。'],['价值 3-bet 的线:55%','tbline','你的牌对“对手面对 3-bet 会继续的牌”胜率约 55% 以上,才打价值 3-bet。'],['3-bet 打多大','tbsize','有位置打开池的 2.5–3 倍,没位置打 3.5–4 倍。'],['被 3-bet 了','f3b','先算跟注需要的胜率,再看你的牌对他 3-bet 范围够不够。']],
- cbet:[['什么是持续下注','cbdef','翻牌前你是加注的人,翻牌后接着下注,叫持续下注(c-bet)。'],['牌面干还是湿','texbars','红是已经中了的牌,金是听牌。金色越多,牌面越湿。'],['怎么下','cbplan','干燥面多下小注,湿润面少下大注,没位置更谨慎。']],
- size:[['尺寸就是给对手的价格','deny','你下得越大,对手听牌跟注需要的胜率越高。'],['价值下多大','vbet','能被更差的牌跟住的最大尺寸,就是好的价值尺寸。'],['诈唬下多大','bsz','诈唬的钱花得越少,需要的弃牌率越低。']],
+ odds:[['需要多少胜率','potpie','你的胜率高于这个数就跟,低于就弃。'],['两个胜率别搞混','twoeq','需要胜率只看钱;你的胜率看对手牌。'],['常用的四个数','sizes','对手下注越大,你需要的胜率越高。'],['隐含赔率','implied','对手筹码多、会付钱时才算得上。']],
+ bet:[['先懂这几个词','w_bet','点题目里带虚线的词,也能随时看解释。'],['诈唬:不亏要多少人弃','bluffcoin','冒的钱越多,需要他弃得越多。'],['最低防守:你至少要跟多少','mdf100','反过来站在被诈唬的一方:弃太多,对手就随便抢。'],['河牌:诈唬占几成','ratio2','诈唬太多会被抓,太少对手就只在你有好牌时弃。']],
+ range:[['先懂这几个词','w_range','看不到对手的牌,就数他“可能拿的牌”一共有几种。'],['两个胜率','twoeq','需要胜率只看钱,你的胜率要看对手可能拿什么。'],['对手是一组牌','rangegrid','他越爱诈唬,红色越多,你越能跟。'],['数组合','combos','每种牌有几种花色搭配,桌上和你手里的牌会让它变少。']],
+ raise:[['先懂这几个词','w_raise','这一关比的不是胜率,是平均赚多少。'],['三个选择各赚多少','evtree2','每种结果的钱 × 发生的比例,加起来比大小。'],['这一关的假设','assume','加注的价值 = 对手弃牌直接拿的钱 + 被跟时还能赢的钱。']],
+ tbet:[['先懂这几个词','w_tbet','这一关讲别人加注以后,你怎么办。'],['开池、3-bet、4-bet','tbflow','每多加注一次,还留在牌局里的牌就更强。'],['什么时候为了赚钱再加注','tbline','他继续玩的牌里,你能赢 55% 以上,才值得再加注。'],['再加注打多大','tbsize','翻牌后你后说话打 2.5–3 倍,先说话打 3.5–4 倍。'],['被别人再加注了','f3b','和前面一样:先算需要胜率。']],
+ cbet:[['先懂这几个词','w_cbet','翻牌前你加注过,翻牌后要不要接着下注。'],['牌面干还是湿','texbars','金色(听牌)越多,牌面越湿。'],['怎么下','cbplan','干的多下小注,湿的少下大注。']],
+ size:[['先懂这几个词','w_size','下注多大,其实是在给对手开价。'],['下多大能让听牌不划算','deny','你下得越大,对手追牌需要的胜率越高。'],['价值下多大','vbet','让比你差的牌还愿意跟的最大尺寸。'],['诈唬下多大','bsz','诈唬花的钱越少,需要他弃的越少。']],
  exam:[['综合考核','trophy','不提示用哪条技巧。全部做对,就去实战。']]
 };
 const EQG={"22":50.4,"33":53.7,"44":57.1,"55":60.3,"66":63.4,"77":66.1,"88":69.3,"99":72.1,"AA":85,"AKs":66.9,"AQs":66.1,"AJs":65.3,"ATs":64.7,"A9s":62.7,"A8s":62,"A7s":61,"A6s":60.2,"A5s":59.9,"A4s":59.2,"A3s":58.4,"A2s":57.3,"AKo":65.2,"KK":82.5,"KQs":63.1,"KJs":62.4,"KTs":61.9,"K9s":60.1,"K8s":57.9,"K7s":57.3,"K6s":56.6,"K5s":55.9,"K4s":54.9,"K3s":53.8,"K2s":52.8,"AQo":64.3,"KQo":61.6,"QQ":79.9,"QJs":60.3,"QTs":59.4,"Q9s":57.5,"Q8s":56.2,"Q7s":54.3,"Q6s":53.7,"Q5s":52.7,"Q4s":51.7,"Q3s":50.6,"Q2s":50.2,"AJo":63.7,"KJo":60.8,"QJo":58.2,"JJ":77.4,"JTs":57.5,"J9s":55.9,"J8s":54,"J7s":52.4,"J6s":50.5,"J5s":50,"J4s":49.3,"J3s":48.6,"J2s":47.2,"ATo":62.9,"KTo":59.5,"QTo":57.1,"JTo":55.2,"TT":75,"T9s":54,"T8s":52.2,"T7s":50.7,"T6s":49.1,"T5s":47.2,"T4s":46.4,"T3s":45.7,"T2s":44.7,"A9o":60.6,"K9o":57.9,"Q9o":55.1,"J9o":53.3,"T9o":51.3,"98s":50.9,"97s":49,"96s":47.5,"95s":45.6,"94s":43.9,"93s":43.3,"92s":42.3,"A8o":59.6,"K8o":56.1,"Q8o":53.5,"J8o":51.4,"T8o":50,"98o":48.4,"87s":47.9,"86s":45.9,"85s":44.7,"84s":42.8,"83s":41,"82s":40,"A7o":59,"K7o":55,"Q7o":51.8,"J7o":49.9,"T7o":47.7,"97o":46.3,"87o":45.3,"76s":45.4,"75s":43.6,"74s":42,"73s":40,"72s":38.2,"A6o":57.9,"K6o":54,"Q6o":50.9,"J6o":47.6,"T6o":45.8,"96o":44.6,"86o":43.4,"76o":42.6,"65s":43.3,"64s":41.4,"63s":39.2,"62s":37.9,"A5o":57.4,"K5o":53.2,"Q5o":50.3,"J5o":47.1,"T5o":43.9,"95o":42.7,"85o":41.2,"75o":40.7,"65o":39.7,"54s":41.6,"53s":39.7,"52s":37.8,"A4o":56.4,"K4o":52.5,"Q4o":49,"J4o":45.7,"T4o":43.5,"94o":40.7,"84o":39.7,"74o":38.4,"64o":37.8,"54o":38.4,"43s":38.6,"42s":36.8,"A3o":55.6,"K3o":51.6,"Q3o":48.2,"J3o":45.2,"T3o":42.8,"93o":40.2,"83o":37.6,"73o":36.8,"63o":36,"53o":36.5,"43o":35.2,"32s":36,"A2o":55.2,"K2o":50.3,"Q2o":47.1,"J2o":44.5,"T2o":41.7,"92o":38.9,"82o":36.8,"72o":34.5,"62o":34.2,"52o":34.4,"42o":33.4,"32o":32.3};const EQM={"AA":[85.2,73.2,49.3],"KK":[82.4,69,43],"AKs":[67,50.8,30.9],"76s":[45.5,32.1,17.9]};
@@ -550,7 +640,68 @@ function setup(pz){const t={pz,picked:[],done:false,show:false,msg:'',mc:''};
   else if(k==='ev'){const r=evSpot(H,B,pz.fold,pz.call,pz.pot,pz.bet,pz.raise);t.r=r;t.opts=['弃牌',`跟注 ${pz.bet}`,`全下 ${pz.raise}`];t.ans=r.ev.indexOf(Math.max(...r.ev));
     t.tab={hero:H,board:B,fold:pz.fold,call:pz.call,pot:pz.pot,bet:pz.bet}}
   return t}
-const HB_MAP={rules:1,hands:3,pre:8,outs:10,r24:10,odds:11,bet:12,range:14,raise:13,tbet:16,cbet:17,size:18,exam:19,duel:19,game:19};const HB_N=20;
+const stp=arr=>`<div class="steps2">${arr.filter(Boolean).map(([t,f,p],i)=>`<div class="st2"><i>${i+1}</i><div><b>${t}</b>${f?(f.startsWith('<div')?f:`<div class="fx">${f}</div>`):''}${p?`<p>${p}</p>`:''}</div></div>`).join('')}</div>`;
+const say=s=>`<div class="say2"><span>人话</span>${s}</div>`;
+function rangeBreak(H,B,str){const dead=[...H,...B];return parseRange(str).map(code=>{const all=rangeCombos(code),lv=liveCombos(all,dead);return{code,n0:all.length,n:lv.length,eq:lv.length?equity(H,lv,B).eq*100:0}}).filter(r=>r.n0)}
+function breakTable(rows,label){const tot=rows.reduce((s,r)=>s+r.n,0);
+  return `<div class="bk"><div class="bkh"><span>${label||'他可能拿'}</span><span>组合</span><span>你赢的比例</span></div>${rows.map(r=>`<div><span class="k">${r.code}</span><span>${r.n}${r.n!==r.n0?`<small> / 本来 ${r.n0}</small>`:''}</span><span class="bar"><i style="width:${Math.max(2,r.eq)}%;background:${r.eq>=50?'var(--green)':'var(--red)'}"></i><b>${pct(r.eq)}</b></span></div>`).join('')}<div class="bkt"><span>合计</span><span>${tot}</span><span></span></div></div>`}
+function explain2(t){const pz=t.pz,k=pz.kind;
+ if(k==='need')return stp([
+   ['你要付多少','',`跟注要付 <b>${pz.bet}</b>。`],
+   ['跟完以后底池一共多少',`${pz.pot} + ${pz.bet} + ${pz.bet} = <em>${pz.pot+2*pz.bet}</em>`,'原来的底池 + 对手下的 + 你跟的。赢了这些全是你的。'],
+   ['需要赢几成',`${pz.bet} ÷ ${pz.pot+2*pz.bet} = <em>${pct(t.val)}</em>`,`你出的钱占总底池的比例,就是你至少要赢的比例。`]])+say(`打 100 次,你至少要赢 ${Math.round(t.val)} 次才不亏。`);
+ if(k==='implied')return stp([
+   ['你中牌的机会',`${pz.outs} ÷ ${pz.left} = <em>${pct(t.h*100)}</em>`,`还剩 ${pz.left} 张没见过的牌,其中 ${pz.outs} 张能让你成牌。`],
+   ['只看现在的底池够不够',`${pct(t.h*100)} × ${pz.pot+2*pz.bet} = ${num(t.h*(pz.pot+2*pz.bet))} < ${pz.bet}`,`平均拿回 ${num(t.h*(pz.pot+2*pz.bet))},比你付的 ${pz.bet} 少,只看现在会亏。`],
+   ['中了以后还要多赢多少',`${pz.bet} ÷ ${pct(t.h*100)} − ${pz.pot+2*pz.bet} = <em>${num(t.val)}</em>`,`如果中牌以后对手还会再付你 ${num(t.val)} 以上,跟注就划算。`]])+say('现在赔率不够,要靠“中了以后还能多赢”来补。对手筹码少、或者一看牌面就会弃,就别追。');
+ if(k==='call'){const call=t.ans===0,parts=[
+   ['需要胜率(只看钱)',`${pz.bet} ÷ (${pz.pot} + ${pz.bet} + ${pz.bet}) = <em>${pct(t.need)}</em>`,'不管对手拿什么牌,这个数都一样。']];
+   if(pz.range){const rows=rangeBreak(t.H,t.B,pz.range);
+     parts.push(['数对手可能拿的牌',breakTable(rows),`桌上和你手里的牌会让有些组合变少。一共 <b>${t.live}</b> 种。`]);
+     parts.push(['你的胜率(看对手牌)',`把每种组合都算一遍,加权平均 = <em>${pct(t.eq)}</em>`,'组合越多的牌,占的分量越大。'])}
+   else parts.push(['你的胜率(看对手牌)',`<em>${pct(t.eq)}</em>`,t.outs&&t.outs.length?`你有 ${t.outs.length} 张 outs,速算 ${t.outs.length} × ${t.B.length===3?4:2} ≈ ${t.outs.length*(t.B.length===3?4:2)}%。程序把剩下的牌全发一遍,精确是 ${pct(t.eq)}。`:'程序把剩下的牌全发一遍算出来的。']);
+   parts.push(['比一比',`${pct(t.eq)} ${call?'&gt;':'&lt;'} ${pct(t.need)} → <em>${call?'跟注':'弃牌'}</em>`,pz.note||'']);
+   return eqMeter(t.eq,t.need)+stp(parts)+say(call?`你赢的机会比需要的多,长期跟注赚钱。`:`你赢的机会不够,跟注长期亏钱。`)}
+ if(k==='bluff')return stp([
+   ['他弃牌',`你赢 <em>+${pz.pot}</em>`,'底池直接归你。'],
+   ['他跟注',`你输 <em>−${pz.bet}</em>`,'你没牌,下注的钱输掉。'],
+   ['不亏的那一点',`${pz.bet} ÷ (${pz.pot} + ${pz.bet}) = <em>${pct(t.val)}</em>`,`赢一次 ${pz.pot},输一次 ${pz.bet}:他弃 ${pz.bet} 次、跟 ${pz.pot} 次时正好打平。`]])+say(`对手弃牌超过 ${pct(t.val)},这个诈唬长期就赚。`);
+ if(k==='mdf')return VIZ.mdf100()+stp([
+   ['对手诈唬冒多少、赢多少',`冒 ${pz.bet},赢 ${pz.pot}`,`他需要你弃牌 ${pz.bet} ÷ (${pz.pot}+${pz.bet}) = ${pct(pz.bet/(pz.pot+pz.bet)*100)} 以上才赚。`],
+   ['所以你至少要继续',`${pz.pot} ÷ (${pz.pot} + ${pz.bet}) = <em>${pct(t.val)}</em>`,'反过来:你继续的比例不能低于这个数。']])+say(`你可能拿的 100 种牌里,至少 ${Math.round(t.val)} 种要跟或加。这是“防止被随便诈唬”的底线,不是说烂牌也要跟。`);
+ if(k==='rbluff'){const need=pz.bet/(pz.pot+2*pz.bet);return VIZ.ratio2()+stp([
+   ['站在对手那边看',`他跟注付 ${pz.bet},能赢 ${pz.pot} + ${pz.bet} + ${pz.bet} = ${pz.pot+2*pz.bet}`,`他需要赢 ${pct(need*100)} 才不亏。他能赢的时候,就是你在诈唬的时候。`],
+   ['让他跟和弃都一样',`你下注的牌里诈唬占 <em>${pct(t.val)}</em>`,'诈唬多于这个,他就总跟,抓你诈唬;少于这个,他就总弃,你好牌赚不到钱。']])+say(`下注 4 次里 1 次是诈唬。长期平均下来是这个比例就行,不用轮流打。`)}
+ if(k==='combo'){const lv=liveCombos(rangeCombos(pz.code),[...t.H,...t.B]);return stp([
+   ['A 还剩几张','<em>4 张</em>','桌上和你手里都没有 A。'],
+   ['K 还剩几张','4 − 1(桌上 K♠)− 1(你的 K♥)= <em>2 张</em>','只剩 K♣ 和 K♦。'],
+   ['两两搭配',`4 × 2 = <em>${t.val} 种</em>`,'每张 A 都能配每张剩下的 K。']])+`<div class="cmb">${lv.map(v=>`<span class="row-c">${v.map(c=>cd(c,'sm')).join('')}</span>`).join('')}</div>`+say('本来 AK 有 16 种,你手里的 K 把它挡掉了一半,这就叫阻挡。');}
+ if(k==='ev'){const r=t.r,P=pz.pot,B=pz.bet,Rz=pz.raise,callBack=r.eqAll*(P+2*B),cb2=r.eqC*(P+2*Rz);return evMeter(r.ev,['弃牌','跟注','全下'])+stp([
+   ['弃牌','<em>0</em>','不再花钱,也不赢。前面放进去的钱已经不是你的了,不算。'],
+   ['跟注',`付 ${B},底池变 ${P}+${B}+${B} = ${P+2*B}<br>你赢 ${pct(r.eqAll*100)} → 平均拿回 ${num(callBack)}<br>${num(callBack)} − ${B} = <em>${num(r.ev[1])}</em>`,`对他所有可能的牌,你的胜率是 ${pct(r.eqAll*100)}。`],
+   ['全下:他弃的那部分',`他 ${r.nF+r.nC} 种组合里 ${r.nF} 种会弃 = ${pct(r.f*100)}<br>弃了你直接拿走 ${P}+${B} = <em>${P+B}</em>`,''],
+   ['全下:他跟的那部分',`底池变 ${P}+${Rz}+${Rz} = ${P+2*Rz}<br>对会跟的牌你赢 ${pct(r.eqC*100)} → 拿回 ${num(cb2)}<br>${num(cb2)} − ${Rz} = <em>${num(cb2-Rz)}</em>`,'他跟的都是比较强的牌,所以这里你的胜率会变低。'],
+   ['全下合计',`${pct(r.f*100)} × ${P+B} + ${pct((1-r.f)*100)} × ${num(cb2-Rz)} = <em>${num(r.ev[2])}</em>`,'每种结果的钱 × 发生的比例,加起来。']])+say(`三个数比大小:${['弃牌','跟注','全下'][t.ans]}最高,所以选它。`)}
+ if(k==='v3b')return `<div class="meter">${mrow('你的胜率',pz.eq,100,pz.eq>=55?'var(--green)':'var(--red)',pct(pz.eq))}${mrow('价值线',55,100,'var(--gold)','55%')}</div>`+stp([
+   ['他会拿什么继续','桌上那串牌,大约占所有牌的 15%','你再加注后,他其他的牌都会弃。'],
+   ['你对这些牌能赢多少',`<em>${pct(pz.eq)}</em>`,'程序把每种组合都发牌模拟了 12 万次。'],
+   ['和 55% 比',pz.eq>=55?`${pct(pz.eq)} ≥ 55% → <em>再加注</em>`:`${pct(pz.eq)} < 55% → <em>不为赚钱再加注</em>`,pz.eq>=55?'他跟的时候,你还是赢面大,加注能多赢钱。':'他跟的时候你不占便宜,加注只会把锅做大来输。可以跟注或弃牌。']]);
+ if(k==='need3')return stp([
+   ['你还要补多少',`${pz.three} − ${pz.open} = <em>${t.call} BB</em>`,'你之前已经放了 2.5,只用补差价。'],
+   ['跟完底池多少',`${pz.open} + ${pz.three} + ${pz.dead} + ${t.call} = ${t.pb+t.call} BB`,'你的 2.5、他的 10、小盲留下的 0.5,加上你补的。'],
+   ['需要胜率',`${t.call} ÷ ${t.pb+t.call} = <em>${pct(t.val)}</em>`,'和第 6 关是同一个公式。']]);
+ if(k==='tex')return pz.boards.map((b,i)=>`<div style="font:700 12px var(--num);color:var(--mute)">牌面 ${'AB'[i]}</div>`+texBars(b)).join('')+stp([
+   ['看金色(听牌)有多少',`牌面 A ${pct(t.r[0].draw)} · 牌面 B ${pct(t.r[1].draw)}`,'对手随便两张牌,所有 1176 种组合逐一算出来的。'],
+   ['金色多的更湿',`牌面 <em>${'AB'[t.ans]}</em>`,'连在一起、同花多的牌,容易有听牌。']])+say('越湿,对手越不容易被吓跑,你下注要更小心。');
+ if(k==='deny'){const rows=t.sz.map(([b,n])=>[n,b/(1+2*b)*100]);return `<div class="meter">${rows.map(([n,v],i)=>mrow(n,v,40,v>t.p*100?'var(--green)':'var(--red)',pct(v),i===t.ans)).join('')}${mrow('他中牌率',t.p*100,40,'var(--gold)',pct(t.p*100))}</div>`+stp([
+   ['他中牌的机会',`${pz.outs} ÷ ${pz.left} = <em>${pct(t.p*100)}</em>`,''],
+   ['每种尺寸,他跟注需要多少',rows.map(([n,v])=>`${n}:${pct(v)}`).join(' · '),'就是第 6 关的需要胜率,只不过这次是他在算。'],
+   ['找第一个比他中牌率高的',`<em>${t.opts[t.ans]}</em>`,'他需要的比他有的多,跟注就不划算。']])+say('你下得越大,他追牌越贵。不过他如果指望中了以后还能多赢,你要下得更大。')}
+ if(k==='bsz')return evMeter(t.ev,['半池','满池'])+stp([
+   ['半池 50',`${pz.f}% × ${pz.pot} − ${100-pz.f}% × ${pz.pot/2} = <em>${num(t.ev[0])}</em>`,`他弃 ${pz.f}% → 赢 ${pz.pot};他跟 ${100-pz.f}% → 输 50。`],
+   ['满池 100',`${pz.f}% × ${pz.pot} − ${100-pz.f}% × ${pz.pot} = <em>${num(t.ev[1])}</em>`,`被跟时输 100。`]])+say('弃牌率一样时,诈唬下得小更省钱。实际中下得大他会弃得多,两样要一起想。');
+ return null}
+const HB_MAP={rules:1,hands:3,pre:8,outs:10,r24:10,odds:11,bet:12,range:14,raise:13,tbet:16,cbet:17,size:18,exam:19,duel:19,game:19};const HB_N=21;
 function hbGrid(cell){const R='AKQJT98765432';let g='';for(let i=0;i<13;i++)for(let j=0;j<13;j++){const code=i===j?R[i]+R[j]:i<j?R[i]+R[j]+'s':R[j]+R[i]+'o';g+=cell(code,i,j)}return `<div class="hgrid">${g}</div>`}
 function heat(v){const t=Math.max(0,Math.min(1,(v-30)/55));const a=[58,48,30],b=[245,206,110];return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(',')})`}
 function hbPage(no,kicker,title,sub,body,foot){return `<section class="hp"><div class="hpi"><div class="hph"><span>德州训练营</span><span>图解手册</span></div><span class="kk">${kicker}</span><h2>${title}</h2>${sub?`<p class="sub">${sub}</p>`:''}<div class="hb-body">${body}</div>${foot?`<p class="ft">${foot}</p>`:''}<div class="hpf"><span>德州扑克 · 新手图解手册</span><b>${String(no).padStart(2,'0')} / ${HB_N}</b></div></div></section>`}
@@ -589,6 +740,7 @@ function handbookPages(){const P=[];const C2=Cn;
   F('期望收益','跟注 <em>胜率 × 总底池 − 跟注</em><br>加注 <em>弃牌率 × 底池 + 跟注率 × (胜率 × 新底池 − 投入)</em>')+
   F('组合数','对子 <em>6</em> · 同花 <em>4</em> · 不同花 <em>12</em> · 总共 <em>1326</em>')+
   F('筹码底池比 SPR','<em>有效筹码 ÷ 翻牌时底池</em>','越小越容易打到全下;越大,单对越要谨慎。'),'参考:DeucesCracked 扑克数学 · PokerSkill MDF / Alpha。'));
+ P.push(hbPage(21,'20 / 名词表','看不懂的词,来这里查','做题时点带虚线的词,也会弹出同样的解释。',`<div class="pl">${Object.entries(TERMS).map(([k,[d,e]])=>`<div class="lt" style="grid-template-columns:1fr"><span><b>${k}</b><small style="color:#efe6cf;font-size:13.5px">${d}</small>${e?`<small>例:${e}</small>`:''}</span></div>`).join('')}</div>`));
  return P}
 let HB_open=false;
 function openHandbook(page){const ov=$('#hbk');ov.innerHTML=`<div class="hbt"><button class="ic" id="hbx" aria-label="关闭">✕</button><b id="hbn">1/${HB_N}</b><span style="width:38px"></span></div><div class="hpages" id="hpg">${handbookPages().join('')}</div>`;ov.hidden=false;document.body.style.overflow='hidden';
@@ -621,8 +773,8 @@ function eqMeter(eq,need){return `<div class="meter">${mrow('你的胜率',eq,10
 function evMeter(ev,names){const mx=Math.max(1,...ev.map(Math.abs)),b=ev.indexOf(Math.max(...ev));
   return `<div class="meter">${ev.map((v,i)=>{const w=Math.abs(v)/mx*50;return `<div class="mrow${i===b?' best':''}"><span>${names[i]}</span><span class="t"><span style="${v>=0?'left:50%':'right:50%'};width:${Math.max(.8,w)}%;background:${v>=0?'var(--green)':'var(--red)'}"></span><i class="zero" style="left:50%"></i></span><b>${v>=0?'+':''}${num(v)}</b></div>`}).join('')}</div>`}
 const fx=s=>`<div class="fx">${s}</div>`;
-function explain(t){const pz=t.pz,k=pz.kind;let h='';
-  if(k==='mc'||k==='best'||k==='win')h=`<p class="tx">${pz.why}</p>`;
+function explain(t){const pz=t.pz,k=pz.kind;let h='';const x2=explain2(t);if(x2)return x2;
+  if(k==='mc'||k==='best'||k==='win')h=`<p class="tx">${tip(pz.why)}</p>`;
   else if(k==='v3b')h=`<div class="meter">${mrow('你的胜率',pz.eq,100,pz.eq>=55?'var(--green)':'var(--red)',pct(pz.eq))}${mrow('价值线',55,100,'var(--gold)','55%')}</div><p class="tx">对这个继续范围,你的胜率 ${pct(pz.eq)},${pz.eq>=55?'高于 55%,打价值 3-bet。':'低于 55%,不打价值 3-bet,看情况跟注或弃牌。'}(程序模拟 12 万局)</p>`;
   else if(k==='need3')h=fx(`要补 ${pz.three} − ${pz.open} = ${t.call}<br>现在底池 ${pz.open} + ${pz.three} + ${pz.dead} = ${t.pb}<br>${t.call} ÷ (${t.pb} + ${t.call}) = <em>${pct(t.val)}</em>`);
   else if(k==='tex')h=pz.boards.map((b,i)=>`<div style="font:700 12px var(--num);color:var(--mute)">牌面 ${'AB'[i]}</div>`+texBars(b)).join('')+`<p class="tx">牌面 ${'AB'[t.ans]} 上对手有听牌的比例 ${pct(t.r[t.ans].draw)},另一个只有 ${pct(t.r[1-t.ans].draw)}。听牌越多越湿。</p>`;
@@ -661,7 +813,7 @@ function renderHome(){$('#ttl').textContent='德州训练营';const nu=nextUnfin
     <div class="path" style="height:${CH.length*H}px"><svg class="ln" viewBox="0 0 ${W} ${CH.length*H}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="#33405a" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round"/></svg>`+
     CH.map((c,k)=>{const n=c.pz.filter((_,j)=>done.has(key(k,j))).length,st=n===c.pz.length?'done':nu&&nu.k===k?'cur':'todo';const left=xs[k]*(W-74),labLeft=xs[k]>.6;
       return `<div class="node"><button class="lvl ${st}" data-ch="${k}" style="left:${left}px" aria-label="第 ${k+1} 关 ${c.t}"><span class="chip">${k+1}</span></button><button class="lab" data-ch="${k}" style="${labLeft?`left:0;width:${left-14}px;text-align:right;align-items:flex-end`:`left:${left+88}px;width:calc(100% - ${left+88}px)`}"><b>${c.t}</b><small>${c.d}</small><span class="stars">${c.pz.map((_,j)=>`<span class="${done.has(key(k,j))?'on':''}"></span>`).join('')}</span></button></div>`}).join('')+`</div>
-    <div class="tiles"><button class="tile play" data-v="game"><span class="row-c">${cd(card('Ah'),'sm')}${cd(card('Kh'),'sm')}</span><b>实战</b><small>随机发牌,三步:算赔率、估胜率、选弃跟加${stat.n?` · 已练 ${stat.n} 手`:''}</small></button><button class="tile" id="hbt2"><span class="row-c"><span class="chip" style="--s:26px">册</span></span><b>图解手册</b><small>20 页:规则、牌型、169 手牌胜率、开池表、3-bet、持续下注、公式</small></button><button class="tile duel" data-v="duel"><span class="row-c"><span class="chip b" style="--s:40px;font-size:15px">稳</span><span class="chip r" style="--s:40px;font-size:15px;margin-left:-10px">猛</span></span><div><b>对战机器人</b><small>和两个性格不同的机器人打完整的牌局,能下注、加注、全下,教练实时算胜率</small></div></button></div>`;
+    <div class="tiles"><button class="tile play" data-v="game"><span class="row-c">${cd(card('Ah'),'sm')}${cd(card('Kh'),'sm')}</span><b>实战</b><small>随机发牌,三步:算赔率、估胜率、选弃跟加${stat.n?` · 已练 ${stat.n} 手`:''}</small></button><button class="tile" id="hbt2"><span class="row-c"><span class="chip" style="--s:26px">册</span></span><b>图解手册</b><small>21 页:规则、牌型、169 手牌胜率、开池表、公式、名词表</small></button><button class="tile duel" data-v="duel"><span class="row-c"><span class="chip b" style="--s:40px;font-size:15px">稳</span><span class="chip r" style="--s:40px;font-size:15px;margin-left:-10px">猛</span></span><div><b>对战机器人</b><small>和两个性格不同的机器人打完整的牌局,能下注、加注、全下,教练实时算胜率</small></div></button></div>`;
   app.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{const k=+b.dataset.ch;const first=CH[k].pz.findIndex((_,j)=>!done.has(key(k,j)));S={view:'ch',ch:k,step:first<=0?0:first+1};T=null;render();scrollTo(0,0)});
   app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S={view:b.dataset.v};if(S.view==='game'&&!G)deal();if(S.view==='duel'&&!D){newSession();return scrollTo(0,0)}render();scrollTo(0,0)});
   if($('#hbt2'))$('#hbt2').onclick=()=>openHandbook(0);
@@ -671,22 +823,30 @@ function chartHTML(){const R='AKQJT98765432',inR=new Set(parseRange(RF[chartPos]
   return `<div class="tabs" role="group" aria-label="位置">${Object.keys(RF).map(k=>`<button data-pos="${k}" aria-pressed="${k===chartPos}">${k}</button>`).join('')}</div><div class="grid">${g}</div><p class="src">${POSN[chartPos]}开 ${pct(rfPct(chartPos))} 的牌 · 右上同花,左下不同花 · 来源 <a href="https://www.pokerskill.com/charts/opening-ranges/" target="_blank" rel="noopener">PokerSkill</a></p>`}
 function drawChart(){const ch=$('#chart');if(!ch)return;ch.innerHTML=chartHTML();ch.querySelectorAll('[data-pos]').forEach(b=>b.onclick=()=>{chartPos=b.dataset.pos;drawChart()})}
 function renderCh(){const c=CH[S.ch];$('#ttl').textContent=`${S.ch+1} · ${c.t}`;
-  const seg=`<div class="seg"><span class="${S.step===0?'cur':'on'}"></span>${c.pz.map((_,j)=>`<span class="${S.step===j+1?'cur':done.has(key(S.ch,j))?'on':''}"></span>`).join('')}</div>`;
+  const nd=c.pz.filter((_,j)=>done.has(key(S.ch,j))).length;
+  const seg=`<div class="qnav" role="tablist" aria-label="本关题目"><button class="qp lsn${S.step===0?' cur':''}" data-s="0">讲</button>${c.pz.map((_,j)=>`<button class="qp${S.step===j+1?' cur':''}${done.has(key(S.ch,j))?' on':''}" data-s="${j+1}" aria-label="第 ${j+1} 题${done.has(key(S.ch,j))?',已做过':''}">${j+1}</button>`).join('')}<span class="qn">已做 ${nd}/${c.pz.length}</span></div>`;
   if(S.step===0){const sl=SLIDES[c.id];
-    app.innerHTML=seg+`<div class="slides" id="sl">${sl.map(([t,v,d],i)=>`<section class="slide"><span class="no">要点 ${i+1}/${sl.length}</span><h3>${t}</h3><div class="viz">${VIZ[v]()}</div><p>${d}</p></section>`).join('')}</div>`+
+    app.innerHTML=seg+`<div class="slides" id="sl">${sl.map(([t,v,d],i)=>`<section class="slide"><span class="no">要点 ${i+1}/${sl.length}</span><h3>${t}</h3><div class="viz">${VIZ[v]()}</div><p>${tip(d)}</p></section>`).join('')}</div>`+
       (sl.length>1?`<div class="dots" id="dots">${sl.map((_,i)=>`<span class="${i?'':'on'}"></span>`).join('')}</div>`:'')+`<div class="acts"><button class="btn pri" id="go">开始练习 · ${c.pz.length} 题</button></div>`;
     drawChart();const el=$('#sl');if($('#dots'))el.addEventListener('scroll',()=>{const i=Math.round(el.scrollLeft/(el.firstElementChild.offsetWidth+12));$('#dots').querySelectorAll('span').forEach((d,j)=>d.className=j===i?'on':'')},{passive:true});
     $('#go').onclick=()=>{S.step=1;T=null;render();scrollTo(0,0)}}
-  else{const pz=c.pz[S.step-1];if(!T)T=setup(pz);const last=S.step===c.pz.length;
-    const tab=T.tab?felt(T.tab):'';
-    app.innerHTML=seg+`<div class="ask"><span class="av">荷</span><p>${pz.ask}</p></div>`+tab+optsHTML(T.opts,T.picked,T.ans,T.done)+
-      (T.done?fbHTML(true,T.picked.length===1?'答对了':'对了',explain(T),`<div class="acts"><button class="btn pri" id="nx">${last?(S.ch<CH.length-1?'下一关 ›':'去实战 ›'):'下一题 ›'}</button></div>`):
-        T.msg?fbHTML(false,'再想想',`${T.show?explain(T):''}<div class="acts"><button class="btn" id="sh">${T.show?'收起解法':'看解法'}</button></div>`):'');
-    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(T.done)return;const i=+b.dataset.i;if(!T.picked.includes(i))T.picked.push(i);
+  else{const pz=c.pz[S.step-1];if(!T){T=setup(pz);if(done.has(key(S.ch,S.step-1)))T.review=true}const last=S.step===c.pz.length;
+    const tab=T.tab?felt(T.tab):'';const prev=`<button class="btn" id="pv">‹ ${S.step===1?'要点':'上一题'}</button>`;
+    app.innerHTML=seg+`<div class="ask"><span class="av">荷</span><p>${tip(pz.ask)}</p></div>`+tab+optsHTML(T.opts,T.picked,T.ans,T.done||T.review)+
+      (T.review?`<div class="fb good rv" id="fb"><div class="hd"><span class="chip" style="--s:34px;font-size:15px">✓</span>做过了 · 答案是「${T.opts[T.ans]}」</div>${explain(T)}<div class="acts">${prev}<button class="btn" id="redo">重做</button><button class="btn pri" id="nx">${last?(S.ch<CH.length-1?'下一关 ›':'去实战 ›'):'下一题 ›'}</button></div></div>`:
+      T.done?fbHTML(true,T.picked.length===1?'答对了':'对了',explain(T),`<div class="acts">${prev}<button class="btn pri" id="nx">${last?(S.ch<CH.length-1?'下一关 ›':'去实战 ›'):'下一题 ›'}</button></div>`):
+        T.msg?fbHTML(false,T.picked.length?'再想想':'答案和解法',`${T.show?explain(T):''}<div class="acts">${prev}<button class="btn" id="sh">${T.show?'收起解法':'看解法'}</button></div>`):'');
+    if(!T.done&&!T.review&&!T.msg)app.insertAdjacentHTML('beforeend',`<div class="acts">${prev}<button class="btn" id="sk">看答案</button></div>`);
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(T.done||T.review)return;const i=+b.dataset.i;if(!T.picked.includes(i))T.picked.push(i);
       if(i===T.ans){T.done=true;done.add(key(S.ch,S.step-1));save();render();$('#fb').scrollIntoView({block:'nearest',behavior:'smooth'})}
       else{T.msg=1;render();const o=$('#opts');o.classList.remove('shake');void o.offsetWidth;o.classList.add('shake')}});
     if($('#sh'))$('#sh').onclick=()=>{T.show=!T.show;render()};
-    if($('#nx'))$('#nx').onclick=()=>{T=null;if(!last)S.step++;else if(S.ch<CH.length-1)S={view:'ch',ch:S.ch+1,step:0};else{S={view:'game'};if(!G)deal()}render();scrollTo(0,0)}}}
+    if($('#sk'))$('#sk').onclick=()=>{T.msg=1;T.show=true;render()};
+    if($('#redo'))$('#redo').onclick=()=>{T=setup(pz);render()};
+    if($('#pv'))$('#pv').onclick=()=>{T=null;S.step--;render();scrollTo(0,0)};
+    if($('#nx'))$('#nx').onclick=()=>{T=null;if(!last)S.step++;else if(S.ch<CH.length-1)S={view:'ch',ch:S.ch+1,step:0};else{S={view:'game'};if(!G)deal()}render();scrollTo(0,0)}}
+  app.querySelectorAll('.qp').forEach(b=>b.onclick=()=>{S.step=+b.dataset.s;T=null;render();scrollTo(0,0)});
+  const cur=app.querySelector('.qp.cur');if(cur)cur.scrollIntoView({block:'nearest',inline:'center'})}
 function renderRef(){$('#ttl').textContent='公式速查';
   const sizes=[[1/3,'1/3 池'],[.5,'半池'],[2/3,'2/3 池'],[.75,'3/4 池'],[1,'满池'],[2,'2 倍池']];
   const t1=`<table class="ref"><tr><th>下注</th><th>跟注需胜率</th><th>诈唬需弃牌</th><th>最低防守</th><th>河牌诈唬占比</th></tr>${sizes.map(([b,n])=>`<tr><td>${n}</td><td>${pct(b/(1+2*b)*100)}</td><td>${pct(b/(1+b)*100)}</td><td>${pct(1/(1+b)*100)}</td><td>${pct(b/(1+2*b)*100)}</td></tr>`).join('')}</table>`;
@@ -730,6 +890,7 @@ function renderGame(){$('#ttl').textContent='实战';
   app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const i=+b.dataset.q,j=+b.dataset.i;if(G.p[i]!=null)return;G.p[i]=j;
     if(i===2){stat.n++;if(j===G.ans){stat.ok++;stat.streak++;stat.best=Math.max(stat.best,stat.streak)}else stat.streak=0;save()}else G.stage=i+1;renderGame();const f=$('#fb');if(f)f.scrollIntoView({block:'nearest',behavior:'smooth'})});
   if($('#nx'))$('#nx').onclick=()=>{deal();renderGame();scrollTo(0,0)}}
+document.addEventListener('click',ev=>{const b=ev.target.closest('.term');const sh=$('#tsheet');if(b){const t=TERMS[b.dataset.term];if(!t)return;sh.innerHTML=`<div class="tsi"><b>${b.dataset.term}</b><p>${t[0]}</p>${t[1]?`<small>例:${t[1]}</small>`:''}<button class="btn pri" id="tsx">懂了</button></div>`;sh.hidden=false;return}if(sh&&!sh.hidden&&(ev.target===sh||ev.target.id==='tsx'))sh.hidden=true});
 $('#hbo').onclick=()=>openHandbook(S.view==='ch'?HB_MAP[CH[S.ch].id]:S.view==='home'?0:HB_MAP[S.view]||0);
 $('#back').onclick=()=>{S={view:'home'};T=null;render();scrollTo(0,0)};
 render();
